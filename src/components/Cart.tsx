@@ -59,7 +59,7 @@ export default function Cart() {
             <>
               <div className="space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto">
                 {items.map((item) => (
-                  <div key={item.id} className="flex gap-4 border-b pb-4">
+                  <div key={item._id} className="flex gap-4 border-b pb-4">
                     <img
                       src={item.image_url || '/placeholder.svg'}
                       alt={item.name}
@@ -75,7 +75,7 @@ export default function Cart() {
                           variant="outline"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item._id, item.quantity - 1)}
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
@@ -84,7 +84,7 @@ export default function Cart() {
                           variant="outline"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item._id, item.quantity + 1)}
                           disabled={item.quantity >= item.stock}
                         >
                           <Plus className="h-3 w-3" />
@@ -93,7 +93,7 @@ export default function Cart() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 ml-auto"
-                          onClick={() => removeFromCart(item.id)}
+                          onClick={() => removeFromCart(item._id)}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { ProductService } from '@/services/api';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,16 +9,13 @@ import Navbar from '@/components/Navbar';
 import { ShoppingCart } from 'lucide-react';
 
 interface Product {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   price: number;
   image_url: string;
   stock: number;
-  category_id: string;
-  categories?: {
-    name: string;
-  };
+  createdAt: Date;
 }
 
 export default function Shop() {
@@ -32,20 +29,15 @@ export default function Shop() {
   }, []);
 
   const fetchProducts = async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*, categories(name)')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
-
-    if (error) {
+    try {
+      const data = await ProductService.getProducts();
+      setProducts(data);
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to load products",
       });
-    } else {
-      setProducts(data || []);
     }
     setLoading(false);
   };
@@ -66,7 +58,7 @@ export default function Shop() {
   const renderProductGrid = (filteredProducts: Product[]) => (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {filteredProducts.map((product) => (
-        <Card key={product.id} className="overflow-hidden">
+        <Card key={product._id} className="overflow-hidden">
           <div className="aspect-square overflow-hidden">
             <img
               src={product.image_url || '/placeholder.svg'}
@@ -89,7 +81,7 @@ export default function Shop() {
               className="w-full"
               disabled={product.stock === 0}
               onClick={() => addToCart({
-                id: product.id,
+                _id: product._id,
                 name: product.name,
                 price: product.price,
                 image_url: product.image_url,

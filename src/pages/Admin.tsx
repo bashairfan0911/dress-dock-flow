@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { ProductService } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,13 +14,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trash2, Edit } from 'lucide-react';
 
 interface Product {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   price: number;
   stock: number;
-  is_active: boolean;
   image_url: string;
+  createdAt: Date;
 }
 
 export default function Admin() {
@@ -54,68 +54,59 @@ export default function Admin() {
   }, [isAdmin]);
 
   const fetchProducts = async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
+    try {
+      const data = await ProductService.getProducts();
+      setProducts(data);
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to load products",
       });
-    } else {
-      setProducts(data || []);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const { error } = await supabase.from('products').insert({
-      name: formData.name,
-      description: formData.description,
-      price: parseFloat(formData.price),
-      stock: parseInt(formData.stock),
-      image_url: formData.image_url,
-      is_active: true
-    });
-
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to add product",
+    try {
+      await ProductService.createProduct({
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock),
+        image_url: formData.image_url
       });
-    } else {
+      
       toast({
         title: "Success",
         description: "Product added successfully",
       });
       setFormData({ name: '', description: '', price: '', stock: '', image_url: '' });
       fetchProducts();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add product",
+      });
     }
   };
 
   const deleteProduct = async (id: string) => {
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete product",
-      });
-    } else {
+    try {
+      await ProductService.deleteProduct(id);
       toast({
         title: "Success",
         description: "Product deleted successfully",
       });
       fetchProducts();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete product",
+      });
     }
   };
 
@@ -225,24 +216,23 @@ export default function Admin() {
                         <TableHead>Name</TableHead>
                         <TableHead>Price</TableHead>
                         <TableHead>Stock</TableHead>
-                        <TableHead>Status</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {products.map((product) => (
-                        <TableRow key={product.id}>
+                        <TableRow key={product._id}>
                           <TableCell className="font-medium">{product.name}</TableCell>
                           <TableCell>${product.price}</TableCell>
                           <TableCell>{product.stock}</TableCell>
                           <TableCell>
-                            {product.is_active ? 'Active' : 'Inactive'}
+                            Active
                           </TableCell>
                           <TableCell>
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => deleteProduct(product.id)}
+                              onClick={() => deleteProduct(product._id)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>

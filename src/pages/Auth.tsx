@@ -13,7 +13,7 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
-  const [signupForm, setSignupForm] = useState({ email: '', password: '', fullName: '' });
+  const [signupForm, setSignupForm] = useState({ email: '', password: '', name: '' });
 
   useEffect(() => {
     if (user) {
@@ -31,7 +31,7 @@ export default function Auth() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    await signUp(signupForm.email, signupForm.password, signupForm.fullName);
+    await signUp(signupForm.email, signupForm.password, signupForm.name);
     setIsLoading(false);
   };
 
@@ -86,8 +86,8 @@ export default function Auth() {
                     id="signup-name"
                     type="text"
                     placeholder="John Doe"
-                    value={signupForm.fullName}
-                    onChange={(e) => setSignupForm({ ...signupForm, fullName: e.target.value })}
+                    value={signupForm.name}
+                    onChange={(e) => setSignupForm({ ...signupForm, name: e.target.value })}
                     required
                   />
                 </div>

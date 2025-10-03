@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { OrderService } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -52,49 +52,19 @@ export default function Checkout() {
     setLoading(true);
 
     try {
-      // Create order
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          user_id: user.id,
-          total_amount: totalPrice,
-          shipping_address: shippingAddress,
-          status: 'pending',
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Create order items
-      const orderItems = items.map((item) => ({
-        order_id: order.id,
-        product_id: item.id,
-        quantity: item.quantity,
-        price: item.price,
-      }));
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
-
-      // Update product stock
-      for (const item of items) {
-        const { error: stockError } = await supabase
-          .from('products')
-          .update({ stock: item.stock - item.quantity })
-          .eq('id', item.id);
-
-        if (stockError) throw stockError;
-      }
+      const order = await OrderService.createOrder(
+        user._id,
+        items.map(item => ({
+          productId: item._id,
+          quantity: item.quantity
+        }))
+      );
 
       clearCart();
       
       toast({
         title: "Order placed successfully!",
-        description: "Thank you for your purchase. Order ID: " + order.id.slice(0, 8),
+        description: "Thank you for your purchase. Order ID: " + order._id.slice(0, 8),
       });
 
       navigate('/orders');
@@ -158,7 +128,7 @@ export default function Checkout() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {items.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm">
+                  <div key={item._id} className="flex justify-between text-sm">
                     <span>
                       {item.name} x {item.quantity}
                     </span>

@@ -2,7 +2,7 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 import { useToast } from '@/hooks/use-toast';
 
 interface CartItem {
-  id: string;
+  _id: string;
   name: string;
   price: number;
   image_url: string;
@@ -35,7 +35,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addToCart = (product: Omit<CartItem, 'quantity'>) => {
     setItems((currentItems) => {
-      const existingItem = currentItems.find((item) => item.id === product.id);
+      const existingItem = currentItems.find((item) => item._id === product._id);
       
       if (existingItem) {
         if (existingItem.quantity >= product.stock) {
@@ -53,7 +53,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         });
         
         return currentItems.map((item) =>
-          item.id === product.id
+          item._id === product._id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -69,7 +69,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const removeFromCart = (productId: string) => {
-    setItems((currentItems) => currentItems.filter((item) => item.id !== productId));
+    setItems((currentItems) => currentItems.filter((item) => item._id !== productId));
     toast({
       title: "Removed from cart",
       description: "Item has been removed from your cart",
@@ -84,7 +84,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     setItems((currentItems) =>
       currentItems.map((item) => {
-        if (item.id === productId) {
+        if (item._id === productId) {
           if (quantity > item.stock) {
             toast({
               variant: "destructive",
