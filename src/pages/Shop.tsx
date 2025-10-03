@@ -15,6 +15,7 @@ interface Product {
   price: number;
   image_url: string;
   stock: number;
+  category?: string;
   createdAt: Date;
 }
 
@@ -51,16 +52,33 @@ export default function Shop() {
     });
   };
 
+  const getCategoryBadge = (category?: string) => {
+    if (!category) return null;
+    const colors = {
+      men: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+      women: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
+      unisex: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
+    };
+    return (
+      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${colors[category as keyof typeof colors] || colors.unisex}`}>
+        {category.charAt(0).toUpperCase() + category.slice(1)}
+      </span>
+    );
+  };
+
   const renderProductGrid = (filteredProducts: Product[]) => (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {filteredProducts.map((product) => (
         <Card key={product._id} className="overflow-hidden">
-          <div className="aspect-square overflow-hidden">
+          <div className="aspect-square overflow-hidden relative">
             <img
               src={product.image_url || '/placeholder.svg'}
               alt={product.name}
               className="h-full w-full object-cover transition-transform hover:scale-105"
             />
+            <div className="absolute top-2 right-2">
+              {getCategoryBadge(product.category)}
+            </div>
           </div>
           <CardHeader>
             <CardTitle>{product.name}</CardTitle>
@@ -115,12 +133,21 @@ export default function Shop() {
         ) : (
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="mb-8 grid w-full max-w-md grid-cols-3">
-              <TabsTrigger value="all">All Products</TabsTrigger>
-              <TabsTrigger value="women">Women's</TabsTrigger>
-              <TabsTrigger value="men">Men's</TabsTrigger>
+              <TabsTrigger value="all">
+                All Products ({products.length})
+              </TabsTrigger>
+              <TabsTrigger value="women">
+                Women's ({filterProductsByGender('women').length})
+              </TabsTrigger>
+              <TabsTrigger value="men">
+                Men's ({filterProductsByGender('men').length})
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="all">
+              <div className="mb-4 text-sm text-muted-foreground">
+                Showing all {products.length} products
+              </div>
               {renderProductGrid(filterProductsByGender('all'))}
             </TabsContent>
             
@@ -128,7 +155,12 @@ export default function Shop() {
               {filterProductsByGender('women').length === 0 ? (
                 <p className="text-center text-muted-foreground">No women's products available yet.</p>
               ) : (
-                renderProductGrid(filterProductsByGender('women'))
+                <>
+                  <div className="mb-4 text-sm text-muted-foreground">
+                    Showing {filterProductsByGender('women').length} women's products
+                  </div>
+                  {renderProductGrid(filterProductsByGender('women'))}
+                </>
               )}
             </TabsContent>
             
@@ -136,7 +168,12 @@ export default function Shop() {
               {filterProductsByGender('men').length === 0 ? (
                 <p className="text-center text-muted-foreground">No men's products available yet.</p>
               ) : (
-                renderProductGrid(filterProductsByGender('men'))
+                <>
+                  <div className="mb-4 text-sm text-muted-foreground">
+                    Showing {filterProductsByGender('men').length} men's products
+                  </div>
+                  {renderProductGrid(filterProductsByGender('men'))}
+                </>
               )}
             </TabsContent>
           </Tabs>
