@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/IrfanBasha-03/dress-dock-flow.git
+    repoURL: https://github.com/bashairfan0911/dress-dock-flow.git
     targetRevision: HEAD
     path: k8s
   destination:

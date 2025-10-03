@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dress-dock-client
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: dress-dock-client
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dress-dock-server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: 5000
+      protocol: TCP
+  selector:
+    app: dress-dock-server

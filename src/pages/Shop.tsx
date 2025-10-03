@@ -46,12 +46,8 @@ export default function Shop() {
     if (gender === 'all') return products;
     
     return products.filter(product => {
-      const categoryName = product.categories?.name.toLowerCase() || '';
-      if (gender === 'women') {
-        return categoryName.includes('women');
-      } else {
-        return categoryName.includes('men') && !categoryName.includes('women');
-      }
+      const category = (product as any).category?.toLowerCase() || '';
+      return category === gender;
     });
   };
 
