@@ -385,3 +385,55 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Kubernetes](https://kubernetes.io/)
 - [ArgoCD](https://argoproj.github.io/cd/)
+
+## Developer Troubleshooting
+
+If you run into issues while developing locally, the following quick steps and tips will help:
+
+- Start the backend server (from project root):
+
+```powershell
+cd server
+# development with auto-restart
+npm run dev
+# or one-shot
+npm start
+```
+
+- Start the frontend dev server (project root):
+
+```powershell
+npm run dev
+```
+
+- Common issues
+  - Connection refused (net::ERR_CONNECTION_REFUSED)
+    - Cause: backend not running or listening on a different port.
+    - Fix: ensure backend is started and listening on the port shown in `server/index.js` (default 3002). Use:
+
+```powershell
+netstat -ano | findstr :3002
+# if needed, kill a stuck process
+# Stop-Process -Id <PID> -Force
+```
+
+  - 401 Unauthorized when placing an order
+    - Cause: the backend requires a valid JWT in the Authorization header.
+    - Fix: Sign in via the app (or register then sign in). Confirm the token exists in DevTools > Application > Local Storage under `auth_token`.
+    - The frontend attaches the token automatically. If you still get 401, check the backend logs for token verification details.
+
+  - React Router future flag warning
+    - This is informational. It notifies you about upcoming behavior in v7 such as startTransition wrapping and relative splat changes.
+    - You can opt into the flags when creating the router, or ignore the warning until you upgrade to v7.
+
+- Helpful commands
+
+```powershell
+# Test API endpoint directly (backend must be running)
+Invoke-WebRequest -Uri "http://localhost:3002/api/products" -UseBasicParsing -TimeoutSec 5
+
+# Check node processes
+Get-CimInstance Win32_Process -Filter "Name='node.exe'" | Select-Object ProcessId, CommandLine
+```
+
+If you hit a specific error (eg. `Token is invalid` or `User already exists`), paste the backend server logs in an issue or a PR comment and include the steps to reproduce — I can help pinpoint and fix it quickly.
