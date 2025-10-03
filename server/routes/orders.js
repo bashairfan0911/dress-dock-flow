@@ -10,41 +10,62 @@ router.post('/', auth, async (req, res) => {
   try {
     const { products } = req.body;
     
-    const orderProducts = await Promise.all(
-      products.map(async ({ productId, quantity }) => {
-        const product = await Product.findById(productId);
-        if (!product || product.stock < quantity) {
-          throw new Error(`Product ${productId} is out of stock`);
-        }
-        return {
-          product: productId,
-          quantity,
-        };
-      })
-    );
+    if (!products || products.length === 0) {
+      return res.status(400).json({ message: 'No products in order' });
+    }
 
-    const total = await orderProducts.reduce(async (acc, { product, quantity }) => {
-      const productData = await Product.findById(product);
-      return (await acc) + (productData.price * quantity);
-    }, Promise.resolve(0));
+    console.log('Creating order for user:', req.user._id);
+    console.log('Products:', JSON.stringify(products));
+    
+    // Validate all products first
+    const validatedProducts = [];
+    for (const { productId, quantity } of products) {
+      const product = await Product.findById(productId);
+      
+      if (!product) {
+        console.log(`Product not found: ${productId}`);
+        return res.status(404).json({ message: `Product ${productId} not found` });
+      }
+      
+      if (product.stock < quantity) {
+        console.log(`Insufficient stock for ${product.name}: requested=${quantity}, available=${product.stock}`);
+        return res.status(400).json({ 
+          message: `Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${quantity}` 
+        });
+      }
+      
+      validatedProducts.push({
+        product: productId,
+        quantity,
+        price: product.price,
+      });
+    }
 
+    // Calculate total
+    const total = validatedProducts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    console.log('Order total:', total);
+
+    // Create order
     const order = await Order.create({
       user: req.user._id,
-      products: orderProducts,
+      products: validatedProducts.map(({ product, quantity }) => ({ product, quantity })),
       total,
     });
 
     // Update product stock
     await Promise.all(
-      orderProducts.map(({ product, quantity }) =>
+      validatedProducts.map(({ product, quantity }) =>
         Product.findByIdAndUpdate(product, { $inc: { stock: -quantity } })
       )
     );
 
     await order.populate('products.product');
+    
+    console.log('Order created successfully:', order._id);
     res.status(201).json(order);
   } catch (error) {
-    console.error(error);
+    console.error('Order creation error:', error);
     res.status(500).json({ message: error.message || 'Server error' });
   }
 });
