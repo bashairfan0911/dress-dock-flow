@@ -4,7 +4,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/contexts/CartContext';
 import Navbar from '@/components/Navbar';
+import { ShoppingCart } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -23,6 +25,7 @@ export default function Shop() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { addToCart } = useCart();
 
   useEffect(() => {
     fetchProducts();
@@ -82,7 +85,18 @@ export default function Shop() {
             </p>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" disabled={product.stock === 0}>
+            <Button
+              className="w-full"
+              disabled={product.stock === 0}
+              onClick={() => addToCart({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image_url: product.image_url,
+                stock: product.stock,
+              })}
+            >
+              <ShoppingCart className="mr-2 h-4 w-4" />
               {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
             </Button>
           </CardFooter>

@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, User, LogOut, Shield } from 'lucide-react';
+import { User, LogOut, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import Cart from '@/components/Cart';
 
 export default function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
@@ -21,9 +22,7 @@ export default function Navbar() {
           {user ? (
             <>
               <Link to="/orders">
-                <Button variant="ghost" size="icon">
-                  <ShoppingCart className="h-5 w-5" />
-                </Button>
+                <Button variant="ghost">Orders</Button>
               </Link>
               
               {isAdmin && (
@@ -33,6 +32,8 @@ export default function Navbar() {
                   </Button>
                 </Link>
               )}
+              
+              <Cart />
               
               <Link to="/profile">
                 <Button variant="ghost" size="icon">
