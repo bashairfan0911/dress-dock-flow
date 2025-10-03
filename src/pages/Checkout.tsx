@@ -67,13 +67,26 @@ export default function Checkout() {
       });
 
       navigate('/orders');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error placing order:', error);
+      
+      // Show specific error message from server
+      const errorMessage = error?.response?.data?.message || error?.message || "Failed to place order. Please try again.";
+      
       toast({
         variant: "destructive",
         title: "Order failed",
-        description: "Failed to place order. Please try again.",
+        description: errorMessage,
       });
+      
+      // If product not found, suggest clearing cart
+      if (errorMessage.includes('not found')) {
+        toast({
+          variant: "destructive",
+          title: "Stale cart data",
+          description: "Some products in your cart no longer exist. Please clear your cart and add products again.",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -150,6 +163,17 @@ export default function Checkout() {
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Place Order
+                </Button>
+                
+                <Button
+                  onClick={() => {
+                    clearCart();
+                    navigate('/shop');
+                  }}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Clear Cart & Shop Again
                 </Button>
               </CardContent>
             </Card>
