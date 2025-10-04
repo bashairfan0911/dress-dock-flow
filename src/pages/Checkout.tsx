@@ -60,7 +60,7 @@ export default function Checkout() {
       );
 
       clearCart();
-      
+
       toast({
         title: "Order placed successfully!",
         description: "Thank you for your purchase. Order ID: " + order._id.slice(0, 8),
@@ -69,16 +69,16 @@ export default function Checkout() {
       navigate('/orders');
     } catch (error: any) {
       console.error('Error placing order:', error);
-      
+
       // Show specific error message from server
       const errorMessage = error?.response?.data?.message || error?.message || "Failed to place order. Please try again.";
-      
+
       toast({
         variant: "destructive",
         title: "Order failed",
         description: errorMessage,
       });
-      
+
       // If product not found, suggest clearing cart
       if (errorMessage.includes('not found')) {
         toast({
@@ -109,7 +109,7 @@ export default function Checkout() {
       <Navbar />
       <div className="container py-8">
         <h1 className="mb-8 text-4xl font-bold">Checkout</h1>
-        
+
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <Card>
@@ -147,7 +147,7 @@ export default function Checkout() {
                     <span>${(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
-                
+
                 <div className="border-t pt-4">
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total:</span>
@@ -164,7 +164,7 @@ export default function Checkout() {
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Place Order
                 </Button>
-                
+
                 <Button
                   onClick={() => {
                     clearCart();
