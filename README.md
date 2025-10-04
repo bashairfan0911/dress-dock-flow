@@ -9,7 +9,10 @@ A modern e-commerce platform built with React, TypeScript, and MongoDB.
 - [MongoDB Setup](#mongodb-setup)
 - [Docker Configuration](#docker-configuration)
 - [Kubernetes Deployment](#kubernetes-deployment)
+- [Terraform Infrastructure](#terraform-infrastructure)
 - [ArgoCD Integration](#argocd-integration)
+- [CI/CD Pipeline](#cicd-pipeline)
+- [Monitoring](#monitoring)
 
 ## Features
 - User authentication and authorization
@@ -209,6 +212,72 @@ kubectl scale deployment dress-dock-flow --replicas=5
 kubectl delete -f k8s/
 ```
 
+## Terraform Infrastructure
+
+This project includes comprehensive Terraform configurations for Infrastructure as Code (IaC) deployment.
+
+### Quick Start with Terraform
+
+#### Local Kind Cluster
+```sh
+cd terraform/local
+terraform init
+terraform apply
+```
+
+#### AWS EKS Cluster
+```sh
+cd terraform/aws
+terraform init
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your values
+terraform apply
+```
+
+### What Terraform Deploys
+
+**Local Kind:**
+- Kind cluster with 3 nodes
+- MongoDB deployment
+- Server and client deployments
+- NGINX Ingress Controller
+- Automatic image building and loading
+- Database seeding
+
+**AWS EKS:**
+- VPC with public/private subnets
+- EKS cluster with managed node groups
+- ECR repositories
+- IAM roles and policies
+- AWS Load Balancer Controller
+- EBS CSI Driver
+- MongoDB StatefulSet with persistent storage
+
+### Benefits of Using Terraform
+
+- **Version Control**: Infrastructure changes tracked in Git
+- **Reproducible**: Deploy identical environments consistently
+- **Plan Before Apply**: Preview changes before execution
+- **State Management**: Track resource changes automatically
+- **Modular**: Reusable components across environments
+- **Multi-Cloud**: Same tool for local and cloud deployments
+
+### Documentation
+
+See [TERRAFORM_GUIDE.md](TERRAFORM_GUIDE.md) for comprehensive documentation including:
+- Detailed configuration options
+- Best practices
+- Cost optimization
+- Troubleshooting
+- Advanced usage patterns
+
+### Cleanup
+
+```sh
+# Destroy all Terraform-managed resources
+terraform destroy
+```
+
 ## ArgoCD Integration
 
 This project includes ArgoCD configuration for GitOps-based continuous delivery. The ArgoCD configuration is located in the `k8s/argocd` directory.
@@ -325,6 +394,64 @@ kubectl argocd app sync dress-dock-flow -n argocd
 kubectl delete -f k8s/argocd/application.yaml
 ```
 
+## CI/CD Pipeline
+
+This project includes a complete CI/CD pipeline with Jenkins and SonarQube.
+
+### Quick Start
+
+```sh
+# Start CI/CD tools
+cd ci-cd
+docker-compose -f docker-compose-cicd.yml up -d
+
+# Access tools
+# Jenkins: http://localhost:8080
+# SonarQube: http://localhost:9000
+```
+
+See [CI-CD-SUMMARY.md](CI-CD-SUMMARY.md) and [ci-cd/CICD_SETUP_GUIDE.md](ci-cd/CICD_SETUP_GUIDE.md) for detailed setup instructions.
+
+## Monitoring
+
+Prometheus and Grafana monitoring stack included.
+
+### Quick Start
+
+```sh
+# Install monitoring stack
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring --create-namespace
+
+# Access Grafana
+kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80
+# Default credentials: admin/prom-operator
+```
+
+See [monitoring/](monitoring/) directory for detailed configuration.
+
+## Testing
+
+Comprehensive testing guide available.
+
+```sh
+# Run all tests
+.\test-all.ps1
+```
+
+See [TESTING_GUIDE.md](TESTING_GUIDE.md) for detailed testing procedures.
+
+## Cleanup
+
+Complete cleanup guide available.
+
+```sh
+# Clean up everything
+.\cleanup-all.ps1
+```
+
+See [CLEANUP_GUIDE.md](CLEANUP_GUIDE.md) for detailed cleanup instructions.
+
 ## Development
 
 ### Available Scripts
@@ -360,8 +487,50 @@ dress-dock-flow/
 │   └── services/      # API services
 ├── k8s/               # Kubernetes manifests
 │   └── argocd/        # ArgoCD configuration
+├── terraform/         # Infrastructure as Code
+│   ├── local/         # Local Kind deployment
+│   └── aws/           # AWS EKS deployment
+├── ci-cd/             # CI/CD configurations
+│   ├── docker-compose-cicd.yml
+│   └── CICD_SETUP_GUIDE.md
+├── monitoring/        # Monitoring configurations
+├── deployment/        # Deployment guides
 ├── public/            # Static assets
+├── Jenkinsfile        # Jenkins pipeline
+├── sonar-project.properties
+├── deploy-kind.ps1    # Quick deployment script
+├── cleanup-all.ps1    # Complete cleanup script
+├── test-all.ps1       # Testing script
 └── package.json       # Project dependencies and scripts
+```
+
+## 📚 Documentation
+
+- [TERRAFORM_GUIDE.md](TERRAFORM_GUIDE.md) - Complete Terraform infrastructure guide
+- [CLEANUP_GUIDE.md](CLEANUP_GUIDE.md) - Comprehensive cleanup instructions
+- [TESTING_GUIDE.md](TESTING_GUIDE.md) - Testing procedures and best practices
+- [CI-CD-SUMMARY.md](CI-CD-SUMMARY.md) - CI/CD pipeline overview
+- [deployment/LOCAL_KIND_DEPLOYMENT.md](deployment/LOCAL_KIND_DEPLOYMENT.md) - Local deployment guide
+- [deployment/AWS_EKS_DEPLOYMENT.md](deployment/AWS_EKS_DEPLOYMENT.md) - AWS deployment guide
+- [deployment/DEPLOYMENT_COMPARISON.md](deployment/DEPLOYMENT_COMPARISON.md) - Deployment options comparison
+
+## 🚀 Quick Commands
+
+```powershell
+# Deploy everything (local)
+.\deploy-kind.ps1
+
+# Test everything
+.\test-all.ps1
+
+# Clean up everything
+.\cleanup-all.ps1
+
+# Deploy with Terraform (local)
+cd terraform/local && terraform init && terraform apply
+
+# Deploy with Terraform (AWS)
+cd terraform/aws && terraform init && terraform apply
 ```
 
 ## Contributing
