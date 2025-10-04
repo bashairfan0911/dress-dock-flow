@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dress-dock-server-metrics
+  namespace: default
+  labels:
+    app: dress-dock-server
+spec:
+  selector:
+    app: dress-dock-server
+  ports:
+    - name: metrics
+      port: 5000
+      targetPort: 5000
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: dress-dock-server-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: dress-dock-server
+  namespaceSelector:
+    matchNames:
+      - default
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
